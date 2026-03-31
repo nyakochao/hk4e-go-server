@@ -286,7 +286,8 @@ func (g *Game) ChangeGameTimeReq(player *model.Player, payloadMsg pb.Message) {
 	g.WeatherClimateRandom(player, player.WeatherInfo.WeatherAreaId)
 
 	rsp := &proto.ChangeGameTimeRsp{
-		CurGameTime: world.GetGameTime(),
+		CurGameTime: req.GameTime,
+		ExtraDays:   req.ExtraDays,
 	}
 	g.SendMsg(cmd.ChangeGameTimeRsp, player.PlayerId, player.ClientSeq, rsp)
 }

@@ -190,7 +190,7 @@ func Logic(account string, session *net.Session) {
 						continue
 					}
 					if config.GetConfig().Hk4e.ClientProtoProxyEnable {
-						hk4egatenet.ConvServerPbDataToClient(combatInvocationsNotify, session.ClientProtoProxy)
+						hk4egatenet.ConvSubPbDataServerToClient(combatInvocationsNotify, session.ClientProtoProxy)
 						clientProtoObj := session.ClientProtoProxy.GetClientProtoObjByName("CombatInvocationsNotify")
 						if clientProtoObj == nil {
 							continue
