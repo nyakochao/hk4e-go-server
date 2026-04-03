@@ -954,7 +954,11 @@ func ConvHighVersionProtoDataServerToClient(clientProtoObj *dynamic.Message, ser
 			if err != nil {
 				continue
 			}
-			clientSceneEntityInfo := clientProtoObj.GetRepeatedFieldByName("entity_list", index).(*dynamic.Message)
+			clientSceneEntityInfoAny, err := clientProtoObj.TryGetRepeatedFieldByName("entity_list", index)
+			if err != nil {
+				continue
+			}
+			clientSceneEntityInfo := clientSceneEntityInfoAny.(*dynamic.Message)
 			msgDesc := clientSceneEntityInfo.GetMessageDescriptor()
 			var ood *desc.OneOfDescriptor
 			for _, o := range msgDesc.GetOneOfs() {
@@ -969,13 +973,13 @@ func ConvHighVersionProtoDataServerToClient(clientProtoObj *dynamic.Message, ser
 			_, clientSceneGadgetInfoAny := clientSceneEntityInfo.GetOneOfField(ood)
 			clientSceneGadgetInfo := clientSceneGadgetInfoAny.(*dynamic.Message)
 			clientTrifleGadgetInfo := clientProtoProxy.GetClientProtoObjByName("TrifleGadgetInfo")
-			clientTrifleGadgetInfo.SetFieldByName("item", clientItem)
-			clientSceneGadgetInfo.SetFieldByName("trifle_gadget", clientTrifleGadgetInfo)
+			_ = clientTrifleGadgetInfo.TrySetFieldByName("item", clientItem)
+			_ = clientSceneGadgetInfo.TrySetFieldByName("trifle_gadget", clientTrifleGadgetInfo)
 		}
 	case "ChangeGameTimeRsp":
 		rsp := serverProtoObj.(*proto.ChangeGameTimeRsp)
-		clientProtoObj.SetFieldByName("game_time", rsp.CurGameTime)
-		clientProtoObj.SetFieldByName("client_game_time", rsp.ExtraDays)
+		_ = clientProtoObj.TrySetFieldByName("game_time", rsp.CurGameTime)
+		_ = clientProtoObj.TrySetFieldByName("client_game_time", rsp.ExtraDays)
 	}
 }
 
@@ -987,8 +991,17 @@ func ConvHighVersionProtoDataClientToServer(serverProtoObj pb.Message, clientPro
 	switch cmdName {
 	case "ChangeGameTimeReq":
 		req := serverProtoObj.(*proto.ChangeGameTimeReq)
-		req.GameTime = clientProtoObj.GetFieldByName("game_time").(uint32)
-		req.ExtraDays = clientProtoObj.GetFieldByName("client_game_time").(uint32)
-		req.IsForceSet = clientProtoObj.GetFieldByName("is_force_set").(bool)
+		gameTimeAny, err := clientProtoObj.TryGetFieldByName("game_time")
+		if err == nil {
+			req.GameTime = gameTimeAny.(uint32)
+		}
+		extraDaysAny, err := clientProtoObj.TryGetFieldByName("client_game_time")
+		if err == nil {
+			req.ExtraDays = extraDaysAny.(uint32)
+		}
+		isForceSetAny, err := clientProtoObj.TryGetFieldByName("is_force_set")
+		if err == nil {
+			req.IsForceSet = isForceSetAny.(bool)
+		}
 	}
 }
